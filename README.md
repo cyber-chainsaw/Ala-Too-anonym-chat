@@ -1,23 +1,35 @@
 # Anonymous Telegram Chat Bot
 
-A professional anonymous chat bot for Telegram built with **Python**, **pyTelegramBotAPI**, and **SOLID** principles.
+**Группа:** 
+EEAIR-25: Asanov Iskhak, Nurmamatov Bekbolot, Kubanychbekov Nurislam.
 
-## Features
-- **Random Pairing**: Instantly connect users for anonymous conversations.
-- **Full Media Support**: Relay text, stickers, GIFs, photos, videos, voice notes, and "circles".
-- **Premium Reveal**: Integrated **Telegram Stars (XTR)** payment system to reveal partner identities.
-- **Safety First**: Automatic refunds if the reveal function encounters an error.
-- **Professional Architecture**: Scalable code structure separating logic from interface.
 
-## Project Structure
-- `main.py`: The entry point that initializes and runs the bot.
-- `bot_app.py`: Contains the `AnonymousBot` class and all Telegram handlers.
-- `chat_manager.py`: Manages queues and active chat sessions.
-- `.env`: (Local only) Stores your `BOT_TOKEN`.
-- `.gitignore`: Ensures your secrets stay private.
 
-## Setup Instructions
+## Описание проекта
+Этот проект представляет собой анонимный чат-бот для Telegram, который позволяет пользователям общаться друг с другом, оставаясь полностью инкогнито. Бот соединяет случайных собеседников и обеспечивает безопасную среду для переписки и обмена медиафайлами.
 
-1. **Install Requirements**:
+## Постановка проблемы
+В современных социальных сетях сложно найти платформу для свободного общения без привязки к личному профилю, номеру телефона или социальному статусу. Пользователи часто сталкиваются с нежелательным вниманием или предвзятостью, основываясь на их личных данных.
+
+## Решение
+Бот решает эту проблему, выступая в роли посредника, который скрывает личности обоих участников. Система очереди (`queue`) и активных сессий (`active_chats`) гарантирует, что сообщения доставляются только текущему партнеру. Дополнительная функция "Reveal" позволяет раскрыть личность собеседника только при взаимном интересе (или оплате), сохраняя контроль за пользователем.
+
+## Технологии 
+- **Язык**: Python 3.x
+- **Библиотека**: `pyTelegramBotAPI` (Telebot) для взаимодействия с Telegram API 
+- **Окружение**: `python-dotenv` для безопасного хранения токенов
+- **Архитектура**: ООП (Объектно-Ориентированное Программирование)
+- **Платежи**: Telegram Stars (XTR)
+
+## Основные возможности
+- **Случайный поиск**: Быстрое соединение с незнакомцем через команду `/findrandom`.
+- **Полная анонимность**: Собеседник видит только текст и медиа, но не ваш профиль.
+- **Поддержка медиа**: Пересылка текста, стикеров, GIF, фото, видео и голосовых сообщений.
+- **Premium Reveal**: Возможность узнать личность собеседника за 50 ⭐️ (Telegram Stars).
+- **Безопасный Refund**: Автоматический возврат звезд в случае технических сбоев.
+
+## Инструкция по запуску
+
+1. **Установите зависимости**:
    ```bash
    pip install pyTelegramBotAPI python-dotenv
