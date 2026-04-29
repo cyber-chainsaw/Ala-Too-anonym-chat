@@ -3,11 +3,12 @@ import telebot
 from telebot.types import LabeledPrice
 from chat_manager import ChatManager
 
+
 class AnonymousBot:
     def __init__(self):
         self.bot = telebot.TeleBot(os.getenv("BOT_TOKEN"))
         self.chat_manager = ChatManager()
-        self.REVEAL_PRICE_STARS = 50 
+        self.REVEAL_PRICE_STARS = 50
         self._register_handlers()
 
     def _register_handlers(self):
@@ -16,13 +17,13 @@ class AnonymousBot:
         self.bot.message_handler(commands=['findrandom'])(self.find_random)
         self.bot.message_handler(commands=['stop'])(self.stop_chat)
         self.bot.message_handler(commands=['reveal'])(self.request_reveal)
-        
+
         self.bot.pre_checkout_query_handler(func=lambda query: True)(self.pre_checkout_handler)
         self.bot.message_handler(content_types=['successful_payment'])(self.successful_payment_handler)
 
         self.bot.message_handler(content_types=[
-            'text', 'sticker', 'photo', 'video', 'voice', 
-            'video_note', 'document', 'animation'  
+            'text', 'sticker', 'photo', 'video', 'voice',
+            'video_note', 'document', 'animation'
         ])(self.relay_message)
 
     def send_welcome(self, message):
@@ -41,6 +42,11 @@ class AnonymousBot:
 
     def find_random(self, message):
         user_id = message.from_user.id
+
+        if self.chat_manager.is_banned(user_id):
+            self.bot.reply_to(message, "⚠️ Доступ ограничен. Вы забанены за нарушение правил.")
+            return
+
         if self.chat_manager.is_in_chat(user_id):
             self.bot.reply_to(message, "❌ Ты уже в чате! Используй /stop.")
             return
@@ -49,8 +55,12 @@ class AnonymousBot:
             self.bot.reply_to(message, "⏳ Ты уже в очереди.")
             return
 
-        partner_id = self.chat_manager.try_create_chat(user_id)
-        if partner_id:
+        result = self.chat_manager.try_create_chat(user_id)
+
+        if result == "banned":
+            self.bot.reply_to(message, "⚠️ Доступ ограничен.")
+        elif result:
+            partner_id = result
             self.bot.send_message(user_id, "✅ Собеседник найден! Начни общаться.")
             self.bot.send_message(partner_id, "✅ Собеседник найден! Начни общаться.")
         else:
@@ -76,8 +86,8 @@ class AnonymousBot:
             title="Раскрытие личности",
             description="Узнайте профиль вашего текущего собеседника.",
             invoice_payload="reveal_payload",
-            provider_token="", 
-            currency="XTR",    
+            provider_token="",
+            currency="XTR",
             prices=[LabeledPrice(label="Reveal", amount=self.REVEAL_PRICE_STARS)]
         )
 
@@ -90,14 +100,16 @@ class AnonymousBot:
         partner_id = self.chat_manager.get_partner(user_id)
 
         if not partner_id:
-            self.bot.send_message(user_id, "❌ Чат завершен. Мы вернули вам ваши ⭐️.")
+            self.bot.send_message(user_id, "❌ Чат завершен. Мы вернуливам ваши ⭐️.")
             self.refund_stars(user_id, charge_id)
             return
 
         try:
             partner_info = self.bot.get_chat(partner_id)
             username = f"@{partner_info.username}" if partner_info.username else f"ID: {partner_id}"
-            self.bot.send_message(partner_id,"🔔 Собеседник оплатил раскрытие вашего профиля и теперь видит вашу ссылку!")
+
+            self.bot.send_message(partner_id, "🔔 Собеседник раскрыл ваш профиль!")
+
             self.bot.send_message(user_id, f"🎉 Личность раскрыта: {username}")
         except Exception as e:
             print(f"Ошибка при Reveal: {e}")
@@ -111,14 +123,13 @@ class AnonymousBot:
             print(f"Не удалось сделать Refund для {user_id}: {e}")
 
     def relay_message(self, message):
-        
         user_id = message.from_user.id
         partner_id = self.chat_manager.get_partner(user_id)
 
         if partner_id:
             self.bot.copy_message(
-                chat_id=partner_id, 
-                from_chat_id=message.chat.id, 
+                chat_id=partner_id,
+                from_chat_id=message.chat.id,
                 message_id=message.message_id
             )
         else:
