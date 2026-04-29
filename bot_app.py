@@ -85,7 +85,6 @@ class AnonymousBot:
         self.bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
 
     def successful_payment_handler(self, message):
-        """Единственная и правильная версия обработчика оплаты"""
         user_id = message.from_user.id
         charge_id = message.successful_payment.telegram_payment_charge_id
         partner_id = self.chat_manager.get_partner(user_id)
@@ -98,6 +97,7 @@ class AnonymousBot:
         try:
             partner_info = self.bot.get_chat(partner_id)
             username = f"@{partner_info.username}" if partner_info.username else f"ID: {partner_id}"
+            self.bot.send_message(partner_id,"🔔 Собеседник оплатил раскрытие вашего профиля и теперь видит вашу ссылку!")
             self.bot.send_message(user_id, f"🎉 Личность раскрыта: {username}")
         except Exception as e:
             print(f"Ошибка при Reveal: {e}")
